@@ -17,22 +17,33 @@
 import os
 import re
 import urllib # urllib is an easy way to download the link 
+import csv
+import time
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
-idList = [[600012, 2008], [600031, 2008]]
+
+# Prepare Stock ID List
+idFirm = []
+idYear = []
+csvsource = csv.reader(file("SSE.csv", "rb"))
+for line in csvsource:
+  idFirm.append(line[0])
+  idYear.append(line[1])
+
+
+# Crawling Reports
+browser = webdriver.Firefox()
 
 BASEURL1 = ("http://www.sse.com.cn/assortment/stock/list/"
             "stockdetails/announcement/index.shtml?COMPANY_CODE=")
 BASEURL2 = ("&reportType=YEARLY&reportType2=定期公告&reportType=YEARLY&"
             "moreConditions=true")
 
-browser = webdriver.Firefox()
-
-for n in range(len(idList)):
-  stockID = str(idList[n][0])
-  yearS = idList[n][1]
+for n in range(0,50):
+  stockID = idFirm[n]
+  yearS = int(idYear[n])
   
   if os.path.exists(stockID):
     print stockID + " is already downloaded!"
@@ -42,6 +53,7 @@ for n in range(len(idList)):
     os.chdir(stockID)
   
   while (yearS < 2015):
+    time.sleep(1)
     yearE = yearS + 3
     url = (BASEURL1 + stockID + "&startDate=" + str(yearS) + "-01-01&endDate="
            + str(yearE) + "-01-01&productID=" + stockID + BASEURL2)
@@ -59,11 +71,13 @@ for n in range(len(idList)):
         if len(fName) > 0:
           fName = fName[0]
           urllib.urlretrieve(toDL, fName)
+          time.sleep(1)
           if not os.path.isfile(fName):
             print "Error: Not Downloaded!"
           else:
             print "Successfully Downloaded " + fName
     yearS = yearS + 3
+
   os.chdir("..")
   
 browser.close()
