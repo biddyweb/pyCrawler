@@ -59,14 +59,18 @@ for n in range(0,50):
            + str(yearE) + "-01-01&productID=" + stockID + BASEURL2)
     print "Downloading reports for firm " + stockID + " from " + str(yearS)
     browser.get(url)
-    elem = WebDriverWait(browser, 10).until(lambda x: x.find_elements_by_partial_link_text("年报"))
-    nFile = len(elem) # Number of links 
+    nFile = 0
+    try:
+      elem = WebDriverWait(browser, 10).until(lambda x: x.find_elements_by_partial_link_text("年报"))
+      nFile = len(elem) # Number of links 
+    except:
+      print "Seems no file on this page"
 
     if nFile > 0:
       for i in range(nFile):
         # Downloading the file
         toDL = elem[i].get_attribute("href")
-        pt = re.compile(stockID + ".*" + "n.pdf")
+        pt = re.compile(stockID + ".*" + ".pdf")
         fName = re.findall(pt, toDL)
         if len(fName) > 0:
           fName = fName[0]
